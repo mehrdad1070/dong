@@ -1,0 +1,2141 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نرم‌افزار محاسبه دنگ</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Vazirmatn and Lalezar -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- HTML2Canvas for screenshots -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+    <style>
+        /* تنظیمات Tailwind CSS برای فونت سفارشی */
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
+        @layer base {
+            /* نیازی به @font-face برای Inter نیست اگر از Google Fonts برای بقیه استفاده شود */
+        }
+
+        /* متغیرهای CSS سفارشی برای تم‌بندی یکنواخت */
+        :root {
+            --primary-color: #4F46E5; /* Indigo 600 */
+            --secondary-color: #6B7280; /* Gray 500 */
+            --success-color: #10B981; /* Green 500 */
+            --danger-color: #EF4444; /* Red 500 */
+        }
+        /* استایل‌های پایه بدنه، شامل فونت و جهت RTL */
+        body {
+            /* اولویت Vazirmatn برای متن عمومی، Lalezar برای عنوان‌ها، سپس Inter به عنوان فال‌بک */
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Gray 100 */
+            direction: rtl;
+            text-align: right;
+            overflow-x: hidden; /* جلوگیری از اسکرول افقی زمانی که سایدبار باز است */
+        }
+        /* اعمال Lalezar به عنوان‌ها برای ظاهری متمایز */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lalezar', 'Vazirmatn', 'Inter', sans-serif;
+        }
+        /* استایل کارت برای بخش‌ها */
+        .card {
+            background-color: #fff;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-xl */
+            padding: 1.5rem; /* p-6 */
+        }
+        /* استایل دکمه اصلی */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex; /* برای هم‌ترازی بهتر با متن */
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-primary:hover {
+            background-color: #4338CA; /* Indigo 700 */
+        }
+        /* استایل دکمه ثانویه (برای ویرایش) */
+        .btn-secondary {
+            background-color: #EEF2FF; /* Light indigo */
+            color: var(--primary-color); /* Indigo text/icon */
+            padding: 0.5rem 0.75rem; /* پدینگ کوچکتر برای ظاهر دکمه آیکون */
+            border-radius: 0.5rem; /* rounded-lg */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-secondary:hover {
+            background-color: #DBEAFE; /* Lighter indigo on hover */
+        }
+        /* استایل دکمه خطر (برای عملیات حذف) */
+        .btn-danger {
+            background-color: #FEE2E2; /* Light red */
+            color: var(--danger-color); /* Red text/icon */
+            padding: 0.5rem 0.75rem; /* پدینگ کوچکتر برای ظاهر دکمه آیکون */
+            border-radius: 0.375rem; /* rounded-md */
+            transition: background-color 0.2s ease-in-out;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-danger:hover {
+            background-color: #FECDCD; /* Lighter red on hover */
+        }
+        /* استایل فیلدهای ورودی و دراپ‌داون‌های انتخاب */
+        input[type="text"],
+        input[type="number"],
+        select {
+            border: 1px solid #D1D5DB; /* border-gray-300 */
+            border-radius: 0.375rem; /* rounded-md */
+            padding: 0.625rem 1rem; /* py-2.5 px-4 */
+            width: 100%;
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        /* افکت‌های فوکوس برای فیلدهای ورودی و دراپ‌داون‌های انتخاب */
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* ring-indigo-500/20 */
+        }
+        /* استایل برای برچسب‌های چک‌باکس سفارشی */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 0;
+        }
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem; /* mr-2 for RTL */
+            margin-left: 0; /* لغو حاشیه چپ پیش‌فرض */
+            width: 1rem; /* w-4 */
+            height: 1rem; /* h-4 */
+            border-radius: 0.25rem; /* rounded */
+            border: 1px solid #D1D5DB; /* border-gray-300 */
+            appearance: none; /* مخفی کردن چک‌باکس پیش‌فرض */
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-color: white;
+            position: relative;
+            flex-shrink: 0; /* جلوگیری از کوچک شدن در صفحه‌های کوچک */
+        }
+        .checkbox-label input[type="checkbox"]:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        .checkbox-label input[type="checkbox"]:checked::after {
+            content: '✔'; /* آیکون تیک */
+            color: white;
+            font-size: 0.75rem; /* text-xs */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        /* استایل برای بالانس مثبت و منفی */
+        .positive-balance {
+            color: var(--success-color); /* text-green-500 */
+        }
+        .negative-balance {
+            color: var(--danger-color); /* text-red-500 */
+        }
+
+        /* تنظیمات ریسپانسیو برای طرح‌بندی گرید */
+        @media (min-width: 768px) {
+            .grid-cols-1-md-2 {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .grid-cols-1-md-3 {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        /* تنظیمات استایل Select2 برای Tailwind و RTL */
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #D1D5DB !important; /* border-gray-300 */
+            border-radius: 0.375rem !important; /* rounded-md */
+            height: 42px !important; /* تنظیم ارتفاع برای مطابقت با ورودی‌ها */
+            padding-top: 5px; /* هم‌ترازی عمودی متن */
+            padding-right: 1rem; /* تنظیم پدینگ برای RTL */
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            left: 8px !important; /* موقعیت پیکان در سمت چپ برای RTL */
+            right: auto !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #374151; /* text-gray-700 */
+            padding-right: 0; /* حذف پدینگ راست پیش‌فرض */
+            padding-left: 0; /* حذف پدینگ چپ پیش‌فرض */
+        }
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
+        }
+        .select2-dropdown {
+            border: 1px solid #D1D5DB !important;
+            border-radius: 0.375rem !important;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            direction: rtl; /* اطمینان از RTL بودن دراپ‌داون */
+            text-align: right; /* اطمینان از هم‌ترازی راست متن دراپ‌داون */
+        }
+        .select2-results__option {
+            padding: 0.625rem 1rem; /* مطابقت با پدینگ ورودی */
+            direction: rtl;
+            text-align: right;
+        }
+        .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #D1D5DB !important;
+            border-radius: 0.375rem !important;
+            padding: 0.625rem 1rem !important;
+            margin: 0.5rem !important;
+            width: calc(100% - 1rem) !important; /* تنظیم برای حاشیه */
+        }
+
+        /* استایل‌های خاص Select2 چند انتخابی (در صورت استفاده در جای دیگر یا به عنوان فال‌بک) */
+        .select2-container--default .select2-selection--multiple {
+            border: 1px solid #D1D5DB !important;
+            border-radius: 0.375rem !important;
+            min-height: 42px; /* مطابقت با ارتفاع انتخاب تکی */
+            padding: 0.25rem 0.5rem !important; /* تنظیم پدینگ برای تگ‌ها */
+            display: flex; /* استفاده از فلکس برای هم‌ترازی تگ‌ها */
+            flex-wrap: wrap; /* اجازه شکستن تگ‌ها */
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background-color: #E0E7FF; /* آبی روشن برای تگ‌ها */
+            color: #374151; /* متن تیره برای تگ‌ها */
+            border: 1px solid #C7D2FE; /* حاشیه برای تگ‌ها */
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            margin: 0.25rem; /* فاصله بین تگ‌ها */
+            display: flex;
+            align-items: center;
+            font-size: 0.875rem; /* text-sm */
+        }
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #6366F1; /* آبی برای آیکون حذف */
+            margin-left: 0.25rem; /* فاصله بین متن و آیکون حذف */
+            margin-right: 0; /* لغو حاشیه پیش‌فرض */
+            font-size: 1rem;
+            font-weight: bold;
+        }
+        .select2-container--default .select2-search--inline .select2-search__field {
+            margin: 0.25rem 0.5rem !important;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+        }
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2) !important;
+        }
+
+
+        /* استایل‌های سفارشی SweetAlert2 برای محتوای فرم ریسپانسیو */
+        .swal2-html-container .grid {
+            display: grid;
+        }
+        .swal2-html-container .grid-cols-1 {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+        }
+        .swal2-html-container .sm\:grid-cols-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .swal2-html-container .gap-4 { /* افزایش فاصله برای فضای بهتر در پاپ‌آپ */
+            gap: 1rem;
+        }
+        .swal2-html-container .mt-4 {
+            margin-top: 1rem;
+        }
+        .swal2-html-container .mb-2 {
+            margin-bottom: 0.5rem;
+        }
+        .swal2-html-container .block {
+            display: block;
+        }
+        .swal2-html-container .text-right {
+            text-align: right;
+        }
+        .swal2-html-container .text-gray-700 {
+            color: #374151;
+        }
+        .swal2-html-container .text-sm {
+            font-size: 0.875rem;
+        }
+        .swal2-html-container .font-bold {
+            font-weight: 700;
+        }
+        .swal2-html-container .flex {
+            display: flex;
+        }
+        .swal2-html-container .items-center {
+            align-items: center;
+        }
+        .swal2-html-container .swal2-input,
+        .swal2-html-container .swal2-select {
+            width: 100% !important; /* اطمینان از عرض کامل ورودی‌ها/انتخاب‌ها */
+            box-sizing: border-box; /* شامل پدینگ و حاشیه در عرض و ارتفاع کلی عنصر */
+            margin: 0; /* حذف حاشیه‌های پیش‌فرض که ممکن است طرح‌بندی را خراب کند */
+        }
+        /* بازنویسی خاص برای استایل ورودی پیش‌فرض SweetAlert2 برای مطابقت بهتر با Tailwind */
+        .swal2-popup .swal2-input {
+            border: 1px solid #D1D5DB;
+            border-radius: 0.375rem;
+            padding: 0.625rem 1rem;
+            font-family: 'Vazirmatn', 'Inter', sans-serif; /* اعمال فونت سفارشی */
+            /* اطمینان از ریسپانسیو بودن در داخل پاپ‌آپ */
+            width: calc(100% - 2rem) !important; /* تنظیم برای پدینگ پیش‌فرض در swal2-input */
+            margin: 0 1rem !important; /* وسط‌چین کردن */
+            box-sizing: border-box;
+        }
+        .swal2-popup .swal2-input:focus,
+        .swal2-popup .swal2-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        .swal2-popup .checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem; /* سازگار با برنامه اصلی */
+            margin-left: 0;
+        }
+        /* استایل برای کانتینر نمودار دایره‌ای */
+        #memberContributionChart {
+            width: 100%;
+            height: 300px; /* ارتفاع ثابت برای نمودار */
+            margin: 2rem auto;
+            display: block;
+        }
+
+        /* استایل‌های جدید برای دکمه‌های شرکت‌کننده */
+        .participant-button {
+            background-color: #E5E7EB; /* Gray 200 */
+            color: #4B5563; /* Gray 600 */
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            text-align: center;
+            border: 1px solid #D1D5DB; /* Gray 300 */
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+            font-size: 0.875rem; /* text-sm */
+            display: inline-block; /* اطمینان از رعایت طرح‌بندی گرید */
+        }
+        .participant-button.selected {
+            background-color: var(--success-color); /* Green 500 */
+            color: white;
+            border-color: var(--success-color);
+        }
+        .participant-button:hover:not(.selected) {
+            background-color: #D1D5DB; /* Lighter gray on hover */
+        }
+
+        /* استایل‌های سایدبار */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -300px; /* به طور پیش‌فرض مخفی (خارج از صفحه در سمت راست) */
+            width: 300px;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease-in-out;
+            z-index: 1050; /* بالاتر از اورلی SweetAlert2 */
+            padding: 1.5rem;
+            overflow-y: auto; /* فعال کردن اسکرول برای محتوای طولانی */
+            direction: rtl; /* اطمینان از RTL بودن محتوای سایدبار */
+            text-align: right;
+        }
+        .sidebar.open {
+            right: 0; /* اسلاید به داخل */
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000; /* زیر سایدبار، بالای محتوای اصلی */
+            display: none;
+        }
+        .overlay.active {
+            display: block;
+        }
+        .sidebar-toggle-btn {
+            background-color: transparent;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #4B5563; /* Gray 600 */
+            position: fixed; /* موقعیت ثابت برای دسترسی */
+            top: 1rem;
+            left: 1rem; /* موقعیت در سمت چپ برای طرح‌بندی RTL */
+            z-index: 1060; /* بالاتر از سایدبار */
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .sidebar-toggle-btn:hover {
+            background-color: #E5E7EB; /* Gray 200 */
+        }
+        /* تنظیم حاشیه محتوای اصلی زمانی که سایدبار در صفحه‌های بزرگتر باز است */
+        @media (min-width: 768px) {
+            body.sidebar-open {
+                margin-left: 300px; /* محتوا را به سمت چپ هل می‌دهد زمانی که سایدبار باز است */
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <!-- دکمه باز و بسته کردن سایدبار -->
+    <button id="sidebarToggleBtn" class="sidebar-toggle-btn">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- اورلی سایدبار -->
+    <div id="sidebarOverlay" class="overlay"></div>
+
+    <!-- محتوای سایدبار -->
+    <div id="sidebar" class="sidebar">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-gray-800">منوی برنامه</h3>
+            <button id="closeSidebarBtn" class="text-gray-500 hover:text-gray-700 text-3xl leading-none">
+                &times;
+            </button>
+        </div>
+
+        <div class="space-y-6">
+            <!-- بخش تاریخچه در سایدبار -->
+            <div id="sidebarHistorySection">
+                <h4 class="text-xl font-semibold text-gray-700 mb-3">تاریخچه دنگ‌ها</h4>
+                <div id="sidebarHistoryList" class="space-y-2">
+                    <p class="text-gray-500 text-center text-sm">هنوز دنگی در تاریخچه ذخیره نشده است.</p>
+                </div>
+            </div>
+
+            <!-- بخش برون‌ریزی و درون‌ریزی در سایدبار -->
+            <div>
+                <h4 class="text-xl font-semibold text-gray-700 mb-3">مدیریت داده‌ها</h4>
+                <button id="sidebarImportExportBtn" class="btn-primary w-full"><i class="fas fa-exchange-alt ml-2"></i> برون‌ریزی و درون‌ریزی</button>
+            </div>
+
+            <!-- بخش درباره ما در سایدبار -->
+            <div>
+                <h4 class="text-xl font-semibold text-gray-700 mb-3">درباره ما</h4>
+                <p class="text-gray-700 text-sm mb-2">
+                    این نرم‌افزار محاسبه دنگ توسط **[نام طراح شما]** طراحی و توسعه یافته است.
+                </p>
+                <p class="text-gray-700 text-sm mb-2">
+                    **نسخه:** 1.1.0
+                </p>
+                <p class="text-gray-700 text-sm">
+                    **تاریخ آخرین به‌روزرسانی:** 2024-07-19
+                </p>
+                <p class="text-gray-700 text-sm mt-2">
+                    هدف از این برنامه، ساده‌سازی فرآیند تقسیم هزینه‌ها در گروه‌های دوستانه، خانوادگی یا هم‌خانه‌ای‌ها است.
+                </p>
+                <!-- دکمه جدید برای صفحه اینفوگرافی -->
+                <a href="info.html" class="btn-secondary w-full mt-4 block text-center">
+                    <i class="fas fa-info-circle ml-2"></i> اطلاعات پروژه
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ناحیه محتوای اصلی -->
+    <div class="container mx-auto max-w-4xl space-y-8">
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-8">نرم‌افزار محاسبه دنگ</h1>
+
+        <!-- بخش مدیریت اعضا -->
+        <div class="card">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">مدیریت اعضا</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <input type="text" id="newMemberName" placeholder="نام عضو جدید" class="flex-grow">
+                <button id="addMemberBtn" class="btn-primary flex-shrink-0"><i class="fas fa-user-plus ml-2"></i> اضافه کردن عضو</button>
+            </div>
+            <div id="membersList" class="space-y-2">
+                <!-- اعضا توسط جاوااسکریپت اینجا رندر می‌شوند -->
+            </div>
+        </div>
+
+        <!-- بخش ثبت هزینه -->
+        <div class="card">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">ثبت هزینه</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="expenseTitle" class="block text-gray-700 text-sm font-bold mb-2">عنوان هزینه:</label>
+                    <input type="text" id="expenseTitle" placeholder="مثال: شام پیتزا" class="w-full">
+                </div>
+                <div>
+                    <label for="expenseAmount" class="block text-gray-700 text-sm font-bold mb-2">مبلغ (تومان):</label>
+                    <input type="number" id="expenseAmount" placeholder="فقط اعداد مثبت" class="w-full" min="0">
+                </div>
+                <div>
+                    <label for="expenseCategory" class="block text-gray-700 text-sm font-bold mb-2">دسته‌بندی هزینه:</label>
+                    <select id="expenseCategory" class="w-full">
+                        <option value="">انتخاب کنید...</option>
+                        <!-- دسته‌بندی‌ها توسط جاوااسکریپت اینجا پر می‌شوند -->
+                    </select>
+                </div>
+                <div>
+                    <label for="payerSelect" class="block text-gray-700 text-sm font-bold mb-2">پرداخت کننده:</label>
+                    <select id="payerSelect" class="w-full">
+                        <option value="">انتخاب کنید...</option>
+                    </select>
+                </div>
+                <div class="col-span-1 md:col-span-2">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">شرکت کنندگان در این هزینه:</label>
+                    <div id="participantsButtons" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                        <!-- دکمه‌های شرکت‌کننده توسط جاوااسکریپت اینجا رندر می‌شوند -->
+                    </div>
+                </div>
+            </div>
+            <button id="addExpenseBtn" class="btn-primary w-full"><i class="fas fa-plus-circle ml-2"></i> ثبت هزینه</button>
+        </div>
+
+        <!-- بخش لیست هزینه‌ها -->
+        <div class="card">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">لیست هزینه‌ها</h2>
+            <div id="expensesList" class="space-y-4">
+                <!-- هزینه‌ها توسط جاوااسکریپت اینجا رندر می‌شوند -->
+                <p id="noExpensesMessage" class="text-gray-500 text-center">هنوز هزینه‌ای ثبت نشده است.</p>
+            </div>
+        </div>
+
+        <!-- بخش نتایج دنگ -->
+        <div class="card">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">نتایج دنگ</h2>
+            <div id="balancesResults" class="space-y-2 mb-4">
+                <!-- بالانس‌ها توسط جاوااسکریپت اینجا رندر می‌شوند -->
+                <p id="noBalancesMessage" class="text-gray-500 text-center">برای مشاهده نتایج، لطفا اعضا و هزینه‌ها را اضافه کنید.</p>
+            </div>
+            <div id="settlementSuggestions" class="space-y-2 border-t border-gray-200 pt-4 mt-4">
+                <h3 class="text-xl font-semibold text-gray-700">پیشنهاد تسویه حساب ساده:</h3>
+                <!-- پیشنهادهای تسویه حساب توسط جاوااسکریپت اینجا رندر می‌شوند -->
+                <p id="noSettlementMessage" class="text-gray-500 text-center">تسویه حسابی برای نمایش وجود ندارد.</p>
+            </div>
+            <!-- دکمه ذخیره دنگ فعلی در صفحه اصلی -->
+            <button id="mainPageSaveDangBtn" class="btn-primary w-full mt-4"><i class="fas fa-save ml-2"></i> ذخیره دنگ فعلی</button>
+        </div>
+
+        <!-- بخش گزارش‌ها و تحلیل‌های تفصیلی -->
+        <div id="reportsSection" class="card">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-700">گزارش‌ها و تحلیل‌های تفصیلی</h2>
+            <button id="generateReportsBtn" class="btn-primary w-full mb-4"><i class="fas fa-chart-pie ml-2"></i> تولید گزارش</button>
+            <div id="reportsOutput" class="space-y-4" style="display: none;"> <!-- به طور پیش‌فرض مخفی است -->
+                <!-- محتوای گزارش به صورت پویا اینجا رندر می‌شود -->
+                <div id="summaryStats" class="space-y-2 text-gray-700"></div>
+                <div id="memberContributionChartContainer" class="flex justify-center items-center">
+                    <svg id="memberContributionChart"></svg>
+                </div>
+                <div id="categorySpending" class="space-y-2 text-gray-700"></div>
+                <div id="topPayerDebtorCreditor" class="space-y-2 text-gray-700"></div>
+                <p id="noReportsMessage" class="text-gray-500 text-center">برای مشاهده گزارش‌ها، لطفا اعضا و هزینه‌ها را اضافه کنید و روی "تولید گزارش" کلیک کنید.</p>
+            </div>
+        </div>
+
+        <!-- دکمه اسکرین‌شات و اشتراک‌گذاری -->
+        <div class="card">
+            <button id="screenshotShareBtn" class="btn-primary w-full"><i class="fas fa-share-alt ml-2"></i> گرفتن اسکرین‌شات و اشتراک‌گذاری</button>
+        </div>
+    </div>
+
+    <!-- jQuery (مورد نیاز برای Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- D3.js برای نمودارها -->
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        // آرایه‌های سراسری برای ذخیره اعضا و هزینه‌های فعلی
+        let members = [];
+        let expenses = [];
+        let expenseIdCounter = 0;
+
+        // آرایه برای ذخیره پروژه‌های دنگ تاریخی
+        let historyProjects = [];
+
+        // دسته‌بندی‌های هزینه از پیش تعریف شده (۳۰ مورد)
+        const expenseCategories = [
+            'غذا و رستوران', 'خرید خواربار', 'حمل و نقل', 'تفریح و سرگرمی', 'قبوض (آب، برق، گاز)',
+            'اجاره/مسکن', 'پوشاک', 'سلامت و درمان', 'آموزش', 'هدیه و کمک',
+            'تعمیرات خانه', 'تعمیرات خودرو', 'سفر', 'ورزش و تناسب اندام', 'فناوری و گجت',
+            'کتاب و مجله', 'آرایش و زیبایی', 'حیوانات خانگی', 'پس‌انداز', 'سرمایه‌گذاری',
+            'مالیات', 'بیمه', 'لوازم التحریر', 'کافی‌شاپ', 'سینما و تئاتر',
+            'موسیقی و کنسرت', 'بازی‌های ویدئویی', 'اشتراک‌ها (نتفلیکس، اسپاتیفای)', 'خدمات بانکی', 'متفرقه'
+        ];
+
+        // دریافت ارجاع به عناصر DOM (به صورت سراسری برای دسترسی توسط توابع مختلف)
+        const newMemberNameInput = document.getElementById('newMemberName');
+        const addMemberBtn = document.getElementById('addMemberBtn');
+        const membersListDiv = document.getElementById('membersList');
+
+        const expenseTitleInput = document.getElementById('expenseTitle');
+        const expenseAmountInput = document.getElementById('expenseAmount');
+        const expenseCategorySelect = document.getElementById('expenseCategory');
+        const payerSelect = document.getElementById('payerSelect');
+        const participantsButtonsDiv = document.getElementById('participantsButtons');
+        const addExpenseBtn = document.getElementById('addExpenseBtn');
+
+        const expensesListDiv = document.getElementById('expensesList');
+        const noExpensesMessage = document.getElementById('noExpensesMessage');
+
+        const balancesResultsDiv = document.getElementById('balancesResults');
+        const noBalancesMessage = document.getElementById('noBalancesMessage');
+        const settlementSuggestionsDiv = document.getElementById('settlementSuggestions');
+        const noSettlementMessage = document.getElementById('noSettlementMessage');
+        const mainPageSaveDangBtn = document.getElementById('mainPageSaveDangBtn');
+
+        const reportsSectionDiv = document.getElementById('reportsSection');
+        const generateReportsBtn = document.getElementById('generateReportsBtn');
+        const reportsOutputDiv = document.getElementById('reportsOutput');
+        const noReportsMessage = document.getElementById('noReportsMessage');
+        // متغیرهای خروجی گزارش - اکنون در داخل renderReports() مقداردهی می‌شوند تا از وجود آن‌ها اطمینان حاصل شود
+        // let summaryStatsDiv;
+        // let memberContributionChartSvg;
+        // let categorySpendingDiv;
+        // let topPayerDebtorCreditorDiv;
+
+        // عناصر سایدبار
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+        const sidebarImportExportBtn = document.getElementById('sidebarImportExportBtn');
+        const sidebarHistorySection = document.getElementById('sidebarHistorySection');
+        const sidebarHistoryList = document.getElementById('sidebarHistoryList');
+
+        // دکمه اسکرین‌شات
+        const screenshotShareBtn = document.getElementById('screenshotShareBtn');
+
+
+        /**
+         * نمایش پیام با استفاده از SweetAlert2.
+         * @param {string} title - عنوان پیام.
+         * @param {string} message - متن پیام.
+         * @param {string} icon - نوع آیکون ('success', 'error', 'warning', 'info', 'question').
+         */
+        function showMessage(title, message, icon) {
+            Swal.fire({
+                title: title,
+                text: message,
+                icon: icon,
+                confirmButtonText: '<i class="fas fa-check"></i> باشه',
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl'
+                },
+                showClass: {
+                    popup: `
+                        animate__animated
+                        animate__fadeIn
+                        animate__faster
+                    `
+                },
+                hideClass: {
+                    popup: `
+                        animate__animated
+                        animate__fadeOut
+                        animate__faster
+                    `
+                }
+            });
+        }
+
+        /**
+         * تولید یک UUID (نسخه ۴) منحصر به فرد.
+         * @returns {string} یک رشته UUID منحصر به فرد.
+         */
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        /**
+         * ذخیره داده‌های فعلی اعضا و هزینه‌ها در حافظه محلی مرورگر.
+         */
+        function saveCurrentSessionState() {
+            localStorage.setItem('dangCurrentMembers', JSON.stringify(members));
+            localStorage.setItem('dangCurrentExpenses', JSON.stringify(expenses));
+            localStorage.setItem('dangCurrentExpenseIdCounter', expenseIdCounter.toString());
+        }
+
+        /**
+         * بارگذاری داده‌های فعلی اعضا و هزینه‌ها از حافظه محلی مرورگر.
+         * @returns {object|null} یک شی حاوی اعضا و هزینه‌های بارگذاری شده، یا null اگر داده‌ای وجود نداشته باشد.
+         */
+        function loadCurrentSessionState() {
+            const savedMembers = localStorage.getItem('dangCurrentMembers');
+            const savedExpenses = localStorage.getItem('dangCurrentExpenses');
+            const savedExpenseIdCounter = localStorage.getItem('dangCurrentExpenseIdCounter');
+
+            if (savedMembers && savedExpenses) {
+                try {
+                    return {
+                        members: JSON.parse(savedMembers),
+                        expenses: JSON.parse(savedExpenses),
+                        expenseIdCounter: parseInt(savedExpenseIdCounter || '0', 10)
+                    };
+                } catch (e) {
+                    console.error("خطا در تجزیه داده‌های جلسه فعلی از حافظه محلی:", e);
+                    // پاک کردن داده‌های خراب
+                    localStorage.removeItem('dangCurrentMembers');
+                    localStorage.removeItem('dangCurrentExpenses');
+                    localStorage.removeItem('dangCurrentExpenseIdCounter');
+                    return null;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * ذخیره جلسه دنگ فعلی به عنوان یک پروژه جدید در تاریخچه.
+         */
+        async function saveCurrentProjectToHistory() {
+            if (members.length === 0 && expenses.length === 0) {
+                showMessage('خطا!', 'هیچ اطلاعاتی برای ذخیره وجود ندارد. لطفا ابتدا اعضا و هزینه‌ها را اضافه کنید.', 'warning');
+                return;
+            }
+
+            const { value: projectName } = await Swal.fire({
+                title: 'نام دنگ را وارد کنید',
+                input: 'text',
+                inputValue: `دنگ ${new Date().toLocaleDateString('fa-IR')}`,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save"></i> ذخیره',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'نام دنگ نمی‌تواند خالی باشد!';
+                    }
+                    return null;
+                },
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    input: 'swal2-input-rtl', /* اعمال استایل خاص اینجا */
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                }
+            });
+
+            if (projectName) {
+                const newProject = {
+                    id: generateUUID(),
+                    name: projectName.trim(),
+                    members: JSON.parse(JSON.stringify(members)), // کپی عمیق
+                    expenses: JSON.parse(JSON.stringify(expenses)), // کپی عمیق
+                    expenseIdCounter: expenseIdCounter,
+                    timestamp: new Date().toISOString()
+                };
+
+                historyProjects.push(newProject);
+                localStorage.setItem('dangHistoryProjects', JSON.stringify(historyProjects));
+                renderHistoryList(); // رندر مجدد لیست تاریخچه در سایدبار
+                showMessage('موفقیت!', `دنگ "${newProject.name}" با موفقیت ذخیره شد.`, 'success');
+            }
+        }
+
+        /**
+         * بارگذاری یک پروژه خاص از تاریخچه به جلسه فعلی.
+         * @param {string} projectId - شناسه پروژه برای بارگذاری.
+         */
+        async function loadProjectFromHistory(projectId) {
+            const projectToLoad = historyProjects.find(p => p.id === projectId);
+            if (!projectToLoad) {
+                showMessage('خطا!', 'دنگ مورد نظر در تاریخچه یافت نشد.', 'error');
+                return;
+            }
+
+            const { isConfirmed } = await Swal.fire({
+                title: 'بارگذاری دنگ از تاریخچه',
+                text: `آیا می‌خواهید دنگ "${projectToLoad.name}" را بارگذاری کنید؟ این کار اطلاعات فعلی شما را بازنویسی خواهد کرد.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-check"></i> بله، بارگذاری کن',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                }
+            });
+
+            if (isConfirmed) {
+                members = JSON.parse(JSON.stringify(projectToLoad.members));
+                expenses = JSON.parse(JSON.stringify(projectToLoad.expenses));
+                expenseIdCounter = projectToLoad.expenseIdCounter;
+
+                saveCurrentSessionState(); // ذخیره پروژه بارگذاری شده به عنوان جلسه فعلی
+                renderMembers();
+                updatePayerAndParticipantLists();
+                renderExpenses();
+                calculateDangs();
+                showMessage('بارگذاری شد!', `دنگ "${projectToLoad.name}" با موفقیت بارگذاری شد.`, 'success');
+                closeSidebar(); // بستن سایدبار پس از بارگذاری
+            }
+        }
+
+        /**
+         * حذف یک پروژه خاص از تاریخچه.
+         * @param {string} projectId - شناسه پروژه برای حذف.
+         */
+        async function deleteProjectFromHistory(projectId) {
+            const projectToDelete = historyProjects.find(p => p.id === projectId);
+            if (!projectToDelete) {
+                showMessage('خطا!', 'دنگ مورد نظر در تاریخچه یافت نشد.', 'error');
+                return;
+            }
+
+            const { isConfirmed } = await Swal.fire({
+                title: 'حذف دنگ از تاریخچه',
+                text: `آیا مطمئن هستید که می‌خواهید دنگ "${projectToDelete.name}" را از تاریخچه حذف کنید؟ این عمل قابل بازگشت نیست.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> بله، حذف کن!',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                }
+            });
+
+            if (isConfirmed) {
+                historyProjects = historyProjects.filter(p => p.id !== projectId);
+                localStorage.setItem('dangHistoryProjects', JSON.stringify(historyProjects));
+                renderHistoryList(); // رندر مجدد لیست تاریخچه در سایدبار
+                showMessage('حذف شد!', `دنگ "${projectToDelete.name}" با موفقیت از تاریخچه حذف شد.`, 'success');
+            }
+        }
+
+        /**
+         * رندر لیست پروژه‌های دنگ تاریخی در سایدبار.
+         */
+        function renderHistoryList() {
+            sidebarHistoryList.innerHTML = ''; // پاک کردن لیست موجود
+            if (historyProjects.length === 0) {
+                sidebarHistoryList.innerHTML = '<p class="text-gray-500 text-center text-sm">هنوز دنگی در تاریخچه ذخیره نشده است.</p>';
+                return;
+            }
+
+            historyProjects.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); // مرتب‌سازی بر اساس جدیدترین
+
+            historyProjects.forEach(project => {
+                const projectDiv = document.createElement('div');
+                // استفاده از flex-col برای قرار دادن نام/تاریخ و دکمه‌ها در خطوط جداگانه
+                projectDiv.className = 'flex flex-col bg-gray-50 p-3 rounded-md shadow-sm mb-2';
+
+                const projectDate = new Date(project.timestamp).toLocaleDateString('fa-IR', {
+                    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                });
+
+                projectDiv.innerHTML = `
+                    <div class="text-gray-800 mb-2">
+                        <strong class="block text-lg">${project.name}</strong>
+                        <span class="block text-xs text-gray-600">${projectDate}</span>
+                    </div>
+                    <div class="flex flex-wrap justify-end gap-2">
+                        <button class="btn-secondary text-sm" data-action="load" data-project-id="${project.id}"><i class="fas fa-folder-open"></i> بارگذاری</button>
+                        <button class="btn-danger text-sm" data-action="delete" data-project-id="${project.id}"><i class="fas fa-trash-alt"></i> حذف</button>
+                        <button class="btn-primary text-sm" data-action="export-single" data-project-id="${project.id}"><i class="fas fa-share-alt"></i> برون‌ریزی و اشتراک</button>
+                    </div>
+                `;
+                sidebarHistoryList.appendChild(projectDiv);
+            });
+
+            // اتصال شنونده‌های رویداد به دکمه‌های تاریخچه در سایدبار
+            sidebarHistoryList.querySelectorAll('button[data-action="load"]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    loadProjectFromHistory(event.currentTarget.dataset.projectId);
+                });
+            });
+            sidebarHistoryList.querySelectorAll('button[data-action="delete"]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    deleteProjectFromHistory(event.currentTarget.dataset.projectId);
+                });
+            });
+            sidebarHistoryList.querySelectorAll('button[data-action="export-single"]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    exportSpecificProject(event.currentTarget.dataset.projectId);
+                });
+            });
+        }
+
+
+        /**
+         * افزودن عضو جدید به آرایه اعضا پس از اعتبارسنجی.
+         */
+        function addMember() {
+            const name = newMemberNameInput.value.trim();
+
+            if (!name) {
+                showMessage('خطا!', 'لطفا نام عضو را وارد کنید.', 'error');
+                return;
+            }
+
+            if (members.includes(name)) {
+                showMessage('خطا!', 'این نام عضو قبلا اضافه شده است.', 'error');
+                return;
+            }
+
+            members.push(name);
+            newMemberNameInput.value = ''; // پاک کردن فیلد ورودی
+            renderMembers(); // به‌روزرسانی لیست اعضا در UI
+            updatePayerAndParticipantLists(); // به‌روزرسانی دراپ‌داون‌ها/دکمه‌ها
+            calculateDangs(); // محاسبه مجدد دنگ‌ها با تغییر اعضا
+            saveCurrentSessionState(); // ذخیره وضعیت جلسه فعلی پس از تغییر
+            // پیام موفقیت پس از افزودن عضو طبق درخواست کاربر حذف شد
+        }
+
+        /**
+         * ویرایش نام عضو موجود و به‌روزرسانی تمام هزینه‌های مرتبط.
+         * @param {string} oldName - نام فعلی عضو.
+         */
+        async function editMember(oldName) {
+            const { value: newName } = await Swal.fire({
+                title: `ویرایش نام عضو: ${oldName}`,
+                input: 'text',
+                inputValue: oldName,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save"></i> ذخیره',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'نام عضو نمی‌تواند خالی باشد!';
+                    }
+                    const trimmedValue = value.trim();
+                    if (trimmedValue !== oldName && members.includes(trimmedValue)) {
+                        return 'این نام عضو قبلا وجود دارد!';
+                    }
+                    return null;
+                },
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    input: 'swal2-input-rtl', /* اعمال استایل خاص اینجا */
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                }
+            });
+
+            if (newName && newName.trim() !== oldName) {
+                const trimmedNewName = newName.trim();
+                const oldIndex = members.indexOf(oldName);
+                if (oldIndex !== -1) {
+                    // به‌روزرسانی نام عضو در آرایه اعضا
+                    members[oldIndex] = trimmedNewName;
+
+                    // به‌روزرسانی نام عضو در تمام هزینه‌ها
+                    expenses.forEach(expense => {
+                        if (expense.payer === oldName) {
+                            expense.payer = trimmedNewName;
+                        }
+                        const participantIndex = expense.participants.indexOf(oldName);
+                        if (participantIndex !== -1) {
+                            expense.participants[participantIndex] = trimmedNewName;
+                        }
+                    });
+
+                    renderMembers();
+                    updatePayerAndParticipantLists();
+                    renderExpenses(); // رندر مجدد هزینه‌ها برای نمایش نام‌های به‌روز شده
+                    calculateDangs();
+                    saveCurrentSessionState();
+                    showMessage('موفقیت!', `نام عضو از "${oldName}" به "${trimmedNewName}" تغییر یافت.`, 'success');
+                }
+            } else if (newName === '') {
+                 showMessage('خطا!', 'نام عضو نمی‌تواند خالی باشد!', 'error');
+            }
+        }
+
+        /**
+         * حذف یک عضو از آرایه اعضا پس از اعتبارسنجی.
+         * یک عضو نمی‌تواند حذف شود اگر در هیچ هزینه‌ای (به عنوان پرداخت‌کننده یا شرکت‌کننده) وجود داشته باشد.
+         * @param {string} nameToRemove - نام عضوی که باید حذف شود.
+         */
+        function removeMember(nameToRemove) {
+            // بررسی اینکه آیا عضو در هیچ هزینه‌ای (به عنوان پرداخت‌کننده یا شرکت‌کننده) دخیل است
+            const isInvolvedInExpense = expenses.some(expense =>
+                expense.payer === nameToRemove || expense.participants.includes(nameToRemove)
+            );
+
+            if (isInvolvedInExpense) {
+                showMessage('خطا!', `نمی‌توانید "${nameToRemove}" را حذف کنید زیرا در یک یا چند هزینه (به عنوان پرداخت‌کننده یا شرکت‌کننده) وجود دارد.`, 'error');
+                return;
+            }
+
+            Swal.fire({
+                title: 'آیا مطمئن هستید؟',
+                text: `آیا می‌خواهید "${nameToRemove}" را حذف کنید؟`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> بله، حذف کن!',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    members = members.filter(member => member !== nameToRemove);
+                    renderMembers();
+                    updatePayerAndParticipantLists();
+                    calculateDangs();
+                    saveCurrentSessionState();
+                    showMessage('حذف شد!', `عضو "${nameToRemove}" با موفقیت حذف شد.`, 'success');
+                }
+            });
+        }
+
+        /**
+         * رندر لیست اعضا در بخش "مدیریت اعضا" در UI.
+         */
+        function renderMembers() {
+            membersListDiv.innerHTML = '';
+            if (members.length === 0) {
+                membersListDiv.innerHTML = '<p class="text-gray-500 text-center">هنوز عضوی اضافه نشده است.</p>';
+                return;
+            }
+            members.forEach(member => {
+                const memberDiv = document.createElement('div');
+                memberDiv.className = 'flex justify-between items-center bg-gray-50 p-3 rounded-md shadow-sm';
+                memberDiv.innerHTML = `
+                    <span class="text-gray-800">${member}</span>
+                    <div>
+                        <button class="btn-secondary text-sm ml-2" data-member-name="${member}"><i class="fas fa-edit"></i></button>
+                        <button class="btn-danger text-sm" data-member-name="${member}"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                `;
+                membersListDiv.appendChild(memberDiv);
+            });
+
+            membersListDiv.querySelectorAll('.btn-danger').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const memberName = event.currentTarget.dataset.memberName;
+                    removeMember(memberName);
+                });
+            });
+
+            membersListDiv.querySelectorAll('.btn-secondary').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const memberName = event.currentTarget.dataset.memberName;
+                    editMember(memberName);
+                });
+            });
+        }
+
+        /**
+         * پر کردن دراپ‌داون دسته‌بندی با دسته‌بندی‌های از پیش تعریف شده.
+         */
+        function populateCategoryDropdown() {
+            if ($('#expenseCategory').data('select2')) {
+                $('#expenseCategory').select2('destroy');
+            }
+
+            expenseCategorySelect.innerHTML = '<option value="">انتخاب کنید...</option>';
+            expenseCategories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                expenseCategorySelect.appendChild(option);
+            });
+
+            $('#expenseCategory').select2({
+                placeholder: "انتخاب کنید...",
+                dir: "rtl"
+            });
+        }
+
+        /**
+         * به‌روزرسانی دراپ‌داون پرداخت‌کننده و دکمه‌های شرکت‌کننده در بخش "ثبت هزینه"
+         * بر اساس لیست فعلی اعضا.
+         */
+        function updatePayerAndParticipantLists() {
+            if ($('#payerSelect').data('select2')) {
+                $('#payerSelect').select2('destroy');
+            }
+
+            payerSelect.innerHTML = '<option value="">انتخاب کنید...</option>';
+            participantsButtonsDiv.innerHTML = '';
+
+            if (members.length === 0) {
+                const noMembersP = document.createElement('option');
+                noMembersP.value = "";
+                noMembersP.textContent = 'لطفا ابتدا اعضا را اضافه کنید.';
+                payerSelect.appendChild(noMembersP);
+
+                const noMembersBtnMessage = document.createElement('p');
+                noMembersBtnMessage.className = 'text-gray-500 text-center col-span-full';
+                noMembersBtnMessage.textContent = 'لطفا ابتدا اعضا را اضافه کنید.';
+                participantsButtonsDiv.appendChild(noMembersBtnMessage);
+
+                $('#payerSelect').select2({
+                    placeholder: "انتخاب کنید...",
+                    dir: "rtl"
+                });
+                return;
+            }
+
+            members.forEach(member => {
+                const optionPayer = document.createElement('option');
+                optionPayer.value = member;
+                optionPayer.textContent = member;
+                payerSelect.appendChild(optionPayer);
+
+                const participantButton = document.createElement('button');
+                participantButton.type = 'button';
+                participantButton.className = 'participant-button';
+                participantButton.textContent = member;
+                participantButton.dataset.member = member;
+                participantsButtonsDiv.appendChild(participantButton);
+
+                participantButton.addEventListener('click', (event) => {
+                    event.currentTarget.classList.toggle('selected');
+                });
+            });
+
+            $('#payerSelect').select2({
+                placeholder: "انتخاب کنید...",
+                dir: "rtl"
+            });
+        }
+
+        /**
+         * افزودن هزینه جدید به آرایه هزینه‌ها پس از اعتبارسنجی.
+         */
+        function addExpense() {
+            const title = expenseTitleInput.value.trim();
+            const amount = parseFloat(expenseAmountInput.value);
+            const category = expenseCategorySelect.value;
+            const payer = payerSelect.value;
+            const selectedParticipants = Array.from(participantsButtonsDiv.querySelectorAll('.participant-button.selected'))
+                                            .map(button => button.dataset.member);
+
+            if (!title) {
+                showMessage('خطا!', 'لطفا عنوان هزینه را وارد کنید.', 'error');
+                return;
+            }
+            if (isNaN(amount) || amount <= 0) {
+                showMessage('خطا!', 'مبلغ هزینه باید یک عدد مثبت باشد.', 'error');
+                return;
+            }
+            if (!category) {
+                showMessage('خطا!', 'لطفا دسته‌بندی هزینه را انتخاب کنید.', 'error');
+                return;
+            }
+            if (!payer) {
+                showMessage('خطا!', 'لطفا پرداخت کننده را انتخاب کنید.', 'error');
+                return;
+            }
+            if (selectedParticipants.length === 0) {
+                showMessage('خطا!', 'لطفا حداقل یک شرکت‌کننده برای این هزینه انتخاب کنید.', 'error');
+                return;
+            }
+
+            const newExpense = {
+                id: expenseIdCounter++,
+                title: title,
+                amount: amount,
+                category: category,
+                payer: payer,
+                participants: selectedParticipants
+            };
+
+            expenses.push(newExpense);
+
+            expenseTitleInput.value = '';
+            expenseAmountInput.value = '';
+            $('#expenseCategory').val('').trigger('change');
+            $('#payerSelect').val('').trigger('change');
+            participantsButtonsDiv.querySelectorAll('.participant-button.selected').forEach(button => {
+                button.classList.remove('selected');
+            });
+
+            renderExpenses();
+            calculateDangs(); // این تابع نتایج را رندر می‌کند اما renderReports را به طور خودکار فراخوانی نمی‌کند
+            saveCurrentSessionState();
+            showMessage('موفقیت!', `هزینه "${title}" با موفقیت ثبت شد.`, 'success');
+        }
+
+        /**
+         * ویرایش یک هزینه موجود.
+         * @param {number} expenseId - شناسه هزینه برای ویرایش.
+         */
+        async function editExpense(expenseId) {
+            const expenseToEdit = expenses.find(exp => exp.id === expenseId);
+            if (!expenseToEdit) {
+                showMessage('خطا!', 'هزینه مورد نظر یافت نشد.', 'error');
+                return;
+            }
+
+            const formHtml = `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="text-right">
+                        <label for="swal-expense-title" class="block text-gray-700 text-sm font-bold mb-2">عنوان هزینه:</label>
+                        <input id="swal-expense-title" class="swal2-input" value="${expenseToEdit.title}" placeholder="عنوان هزینه">
+                    </div>
+                    <div class="text-right">
+                        <label for="swal-expense-amount" class="block text-gray-700 text-sm font-bold mb-2">مبلغ (تومان):</label>
+                        <input id="swal-expense-amount" type="number" class="swal2-input" value="${expenseToEdit.amount}" placeholder="مبلغ (تومان)" min="0">
+                    </div>
+                    <div class="text-right">
+                        <label for="swal-expense-category" class="block text-gray-700 text-sm font-bold mb-2">دسته‌بندی هزینه:</label>
+                        <select id="swal-expense-category" class="swal2-select w-full">
+                            <option value="">انتخاب کنید...</option>
+                            ${expenseCategories.map(cat => `<option value="${cat}" ${expenseToEdit.category === cat ? 'selected' : ''}>${cat}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="text-right">
+                        <label for="swal-payer-select" class="block text-gray-700 text-sm font-bold mb-2">پرداخت کننده:</label>
+                        <select id="swal-payer-select" class="swal2-select w-full">
+                            <option value="">انتخاب کنید...</option>
+                            ${members.map(member => `<option value="${member}" ${expenseToEdit.payer === member ? 'selected' : ''}>${member}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div class="col-span-full text-right mt-4">
+                        <label class="block text-gray-700 text-sm font-bold mb-2">شرکت کنندگان در این هزینه:</label>
+                        <div id="swal-participants-buttons" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${members.map(member => `
+                                <button type="button" class="participant-button ${expenseToEdit.participants.includes(member) ? 'selected' : ''}" data-member="${member}">
+                                    ${member}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            const { value: formValues } = await Swal.fire({
+                title: 'ویرایش هزینه',
+                html: formHtml,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-save"></i> ذخیره تغییرات',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                },
+                didOpen: () => {
+                    $('#swal-payer-select').select2({
+                        placeholder: "انتخاب کنید...",
+                        dir: "rtl",
+                        dropdownParent: $('.swal2-container')
+                    });
+                    $('#swal-expense-category').select2({
+                        placeholder: "انتخاب کنید...",
+                        dir: "rtl",
+                        dropdownParent: $('.swal2-container')
+                    });
+                    document.querySelectorAll('#swal-participants-buttons .participant-button').forEach(button => {
+                        button.addEventListener('click', (event) => {
+                            event.currentTarget.classList.toggle('selected');
+                        });
+                    });
+                },
+                preConfirm: () => {
+                    const title = document.getElementById('swal-expense-title').value.trim();
+                    const amount = parseFloat(document.getElementById('swal-expense-amount').value);
+                    const category = document.getElementById('swal-expense-category').value;
+                    const payer = document.getElementById('swal-payer-select').value;
+                    const participants = Array.from(document.querySelectorAll('#swal-participants-buttons .participant-button.selected'))
+                                            .map(button => button.dataset.member);
+
+                    if (!title) {
+                        Swal.showValidationMessage('لطفا عنوان هزینه را وارد کنید.');
+                        return false;
+                    }
+                    if (isNaN(amount) || amount <= 0) {
+                        Swal.showValidationMessage('مبلغ هزینه باید یک عدد مثبت باشد.');
+                        return false;
+                    }
+                    if (!category) {
+                        Swal.showValidationMessage('لطفا دسته‌بندی هزینه را انتخاب کنید.');
+                        return false;
+                    }
+                    if (!payer) {
+                        Swal.showValidationMessage('لطفا پرداخت کننده را انتخاب کنید.', 'error');
+                        return false;
+                    }
+                    if (participants.length === 0) {
+                        Swal.showValidationMessage('لطفا حداقل یک شرکت‌کننده انتخاب کنید.');
+                        return false;
+                    }
+
+                    return { title, amount, category, payer, participants };
+                }
+            });
+
+            if (formValues) {
+                expenseToEdit.title = formValues.title;
+                expenseToEdit.amount = formValues.amount;
+                expenseToEdit.category = formValues.category;
+                expenseToEdit.payer = formValues.payer;
+                expenseToEdit.participants = formValues.participants;
+
+                renderExpenses();
+                calculateDangs();
+                saveCurrentSessionState();
+                showMessage('موفقیت!', `هزینه "${formValues.title}" با موفقیت ویرایش شد.`, 'success');
+            }
+        }
+
+        /**
+         * حذف یک هزینه از آرایه هزینه‌ها بر اساس شناسه آن.
+         * @param {number} idToRemove - شناسه هزینه برای حذف.
+         */
+        function removeExpense(idToRemove) {
+            Swal.fire({
+                title: 'آیا مطمئن هستید؟',
+                text: 'آیا می‌خواهید این هزینه را حذف کنید؟',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: '<i class="fas fa-trash-alt"></i> بله، حذف کن!',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    expenses = expenses.filter(expense => expense.id !== idToRemove);
+                    renderExpenses();
+                    calculateDangs();
+                    saveCurrentSessionState();
+                    showMessage('حذف شد!', 'هزینه با موفقیت حذف شد.', 'success');
+                }
+            });
+        }
+
+        /**
+         * رندر لیست هزینه‌های ثبت شده در بخش "لیست هزینه‌ها" در UI.
+         */
+        function renderExpenses() {
+            expensesListDiv.innerHTML = '';
+            if (expenses.length === 0) {
+                noExpensesMessage.style.display = 'block';
+                return;
+            } else {
+                noExpensesMessage.style.display = 'none';
+            }
+
+            expenses.forEach(expense => {
+                const expenseDiv = document.createElement('div');
+                expenseDiv.className = 'bg-gray-50 p-4 rounded-md shadow-sm border border-gray-200';
+                expenseDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="text-lg font-semibold text-gray-800">${expense.title}</h4>
+                        <div>
+                            <button class="btn-secondary text-sm ml-2" data-expense-id="${expense.id}"><i class="fas fa-edit"></i></button>
+                            <button class="btn-danger text-sm" data-expense-id="${expense.id}"><i class="fas fa-trash-alt"></i></button>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-1"><strong>مبلغ:</strong> ${expense.amount.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان</p>
+                    <p class="text-gray-700 mb-1"><strong>دسته‌بندی:</strong> ${expense.category || 'نامشخص'}</p>
+                    <p class="text-700 mb-1"><strong>پرداخت کننده:</strong> ${expense.payer}</p>
+                    <p class="text-gray-700"><strong>شرکت کنندگان:</strong> ${expense.participants.join(', ')}</p>
+                `;
+                expensesListDiv.appendChild(expenseDiv);
+            });
+
+            expensesListDiv.querySelectorAll('.btn-danger').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const expenseId = parseInt(event.currentTarget.dataset.expenseId);
+                    removeExpense(expenseId);
+                });
+            });
+
+            expensesListDiv.querySelectorAll('.btn-secondary').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const expenseId = parseInt(event.currentTarget.dataset.expenseId);
+                    editExpense(expenseId);
+                });
+            });
+        }
+
+        /**
+         * محاسبه بالانس نهایی (وضعیت بدهکار/طلبکار) برای هر عضو
+         * و راه‌اندازی رندر نتایج.
+         */
+        function calculateDangs() {
+            const balances = {};
+
+            members.forEach(member => {
+                balances[member] = 0;
+            });
+
+            expenses.forEach(expense => {
+                const perPersonCost = expense.amount / expense.participants.length;
+
+                balances[expense.payer] += expense.amount;
+
+                if (expense.participants.length > 0) {
+                    expense.participants.forEach(participant => {
+                        balances[participant] -= perPersonCost;
+                    });
+                }
+            });
+
+            renderResults(balances);
+            // renderReports() اکنون فقط زمانی فراخوانی می‌شود که generateReportsBtn کلیک شود
+        }
+
+        /**
+         * رندر بالانس‌های نهایی برای هر عضو و پیشنهاد تسویه حساب ساده
+         * در بخش "نتایج دنگ" در UI.
+         * @param {object} balances - شی حاوی بالانس نهایی هر عضو.
+         */
+        function renderResults(balances) {
+            balancesResultsDiv.innerHTML = '';
+            settlementSuggestionsDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-700">پیشنهاد تسویه حساب ساده:</h3>';
+
+            if (members.length === 0) {
+                noBalancesMessage.style.display = 'block';
+                noSettlementMessage.style.display = 'block';
+                return;
+            } else {
+                noBalancesMessage.style.display = 'none';
+                noSettlementMessage.style.display = 'none';
+            }
+
+            let hasPositiveBalance = false;
+            let hasNegativeBalance = false;
+
+            members.forEach(member => {
+                const balance = balances[member] || 0;
+                const balanceClass = balance >= 0 ? 'positive-balance' : 'negative-balance';
+                const balanceText = balance >= 0 ? `طلبکار: ${balance.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان` : `بدهکار: ${Math.abs(balance).toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان`;
+
+                if (balance > 0) hasPositiveBalance = true;
+                if (balance < 0) hasNegativeBalance = true;
+
+                const balanceDiv = document.createElement('div');
+                balanceDiv.className = `flex justify-between items-center p-2 rounded-md ${balance >= 0 ? 'bg-green-50' : 'bg-red-50'}`;
+                balanceDiv.innerHTML = `
+                    <span class="text-gray-800 font-medium">${member}:</span>
+                    <span class="font-bold ${balanceClass}">${balanceText}</span>
+                `;
+                balancesResultsDiv.appendChild(balanceDiv);
+            });
+
+            if (!hasPositiveBalance && !hasNegativeBalance && members.length > 0) {
+                balancesResultsDiv.innerHTML += '<p class="text-gray-500 text-center mt-4">همه حساب‌ها صفر هستند.</p>';
+            }
+
+            const debtors = [];
+            const creditors = [];
+
+            for (const memberName in balances) {
+                const balance = balances[memberName];
+                if (balance < 0) {
+                    debtors.push({ name: memberName, amount: Math.abs(balance) });
+                } else if (balance > 0) {
+                    creditors.push({ name: memberName, amount: balance });
+                }
+            }
+
+            if (debtors.length === 0 && creditors.length === 0) {
+                noSettlementMessage.style.display = 'block';
+                return;
+            } else {
+                noSettlementMessage.style.display = 'none';
+            }
+
+            let settlementCount = 0;
+            let i = 0, j = 0;
+
+            while (i < debtors.length && j < creditors.length) {
+                const debtor = debtors[i];
+                const creditor = creditors[j];
+
+                const amountToSettle = Math.min(debtor.amount, creditor.amount);
+
+                if (amountToSettle > 0.01) {
+                    const settlementP = document.createElement('p');
+                    settlementP.className = 'text-gray-700';
+                    settlementP.innerHTML = `<span class="font-semibold">${debtor.name}</span> باید <span class="font-bold">${amountToSettle.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان</span> به <span class="font-semibold">${creditor.name}</span> بدهد.`;
+                    settlementSuggestionsDiv.appendChild(settlementP);
+                    settlementCount++;
+                }
+
+                debtor.amount -= amountToSettle;
+                creditor.amount -= amountToSettle;
+
+                if (debtor.amount <= 0.01) {
+                    i++;
+                }
+                if (creditor.amount <= 0.01) {
+                    j++;
+                }
+            }
+
+            if (settlementCount === 0) {
+                 noSettlementMessage.style.display = 'block';
+            } else {
+                noSettlementMessage.style.display = 'none';
+            }
+        }
+
+        /**
+         * رندر گزارش‌ها و تحلیل‌های تفصیلی، شامل نمودارها و آمارها.
+         */
+        function renderReports() {
+            // دریافت ارجاع به divهای خروجی گزارش در داخل این تابع زمانی که فراخوانی می‌شود
+            const summaryStatsDiv = document.getElementById('summaryStats');
+            const memberContributionChartSvg = document.getElementById('memberContributionChart');
+            const categorySpendingDiv = document.getElementById('categorySpending');
+            const topPayerDebtorCreditorDiv = document.getElementById('topPayerDebtorCreditor');
+
+            // پاک کردن گزارش‌های قبلی
+            summaryStatsDiv.innerHTML = '';
+            categorySpendingDiv.innerHTML = '';
+            topPayerDebtorCreditorDiv.innerHTML = '';
+            d3.select("#memberContributionChart").selectAll("*").remove(); // پاک کردن محتوای SVG
+
+            if (members.length === 0 || expenses.length === 0) {
+                // فقط در صورت عدم وجود داده، پیام noReportsMessage را نمایش می‌دهد
+                reportsOutputDiv.style.display = 'none'; // مخفی کردن کل بخش خروجی گزارش
+                noReportsMessage.style.display = 'block';
+                return;
+            } else {
+                reportsOutputDiv.style.display = 'block'; // نمایش کل بخش خروجی گزارش
+                noReportsMessage.style.display = 'none';
+            }
+
+            // ۱. آمار خلاصه
+            const totalAmountSpent = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            const averageCostPerPerson = members.length > 0 ? totalAmountSpent / members.length : 0;
+
+            summaryStatsDiv.innerHTML = `
+                <h3 class="text-xl font-semibold text-gray-700">خلاصه کلی:</h3>
+                <p><strong>کل مبلغ هزینه شده:</strong> ${totalAmountSpent.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان</p>
+                <p><strong>میانگین هزینه برای هر نفر:</strong> ${averageCostPerPerson.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان</p>
+            `;
+
+            // ۲. مشارکت اعضا برای نمودار دایره‌ای
+            const memberContributions = {};
+            members.forEach(member => memberContributions[member] = 0);
+            expenses.forEach(expense => {
+                memberContributions[expense.payer] += expense.amount;
+            });
+
+            const chartData = Object.entries(memberContributions)
+                                  .filter(([, amount]) => amount > 0) // فقط اعضایی که چیزی پرداخت کرده‌اند را نشان می‌دهد
+                                  .map(([name, amount]) => ({ name, value: amount }));
+
+            if (chartData.length > 0) {
+                drawPieChart(chartData);
+            } else {
+                d3.select("#memberContributionChart").selectAll("*").remove(); // اطمینان از خالی بودن نمودار
+                const chartContainer = document.getElementById('memberContributionChartContainer');
+                const noChartMessage = document.createElement('p');
+                noChartMessage.className = 'text-gray-500 text-center mt-4';
+                noChartMessage.textContent = 'هیچ هزینه‌ای توسط اعضا پرداخت نشده است تا نمودار نمایش داده شود.';
+                chartContainer.appendChild(noChartMessage);
+            }
+
+
+            // ۳. تفکیک هزینه‌ها بر اساس دسته‌بندی
+            const categorySpending = {};
+            expenseCategories.forEach(cat => categorySpending[cat] = 0); // مقداردهی اولیه تمام دسته‌بندی‌ها
+            expenses.forEach(expense => {
+                if (expense.category && categorySpending.hasOwnProperty(expense.category)) {
+                    categorySpending[expense.category] += expense.amount;
+                }
+            });
+
+            categorySpendingDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-700 mt-4">هزینه‌ها بر اساس دسته‌بندی:</h3>';
+            let hasCategorySpending = false;
+            for (const category in categorySpending) {
+                if (categorySpending[category] > 0) {
+                    hasCategorySpending = true;
+                    categorySpendingDiv.innerHTML += `<p><strong>${category}:</strong> ${categorySpending[category].toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان</p>`;
+                }
+            }
+            if (!hasCategorySpending) {
+                categorySpendingDiv.innerHTML += '<p class="text-gray-500">هیچ هزینه‌ای در دسته‌بندی‌ها ثبت نشده است.</p>';
+            }
+
+
+            // ۴. بیشترین پرداخت‌کننده/بدهکار/طلبکار
+            const balances = {};
+            members.forEach(member => balances[member] = 0);
+            expenses.forEach(expense => {
+                const perPersonCost = expense.amount / expense.participants.length;
+                balances[expense.payer] += expense.amount;
+                if (expense.participants.length > 0) {
+                    expense.participants.forEach(participant => {
+                        balances[participant] -= perPersonCost;
+                    });
+                }
+            });
+
+            let topPayer = { name: '', amount: -1 };
+            let topCreditor = { name: '', amount: -1 };
+            let topDebtor = { name: '', amount: 1 };
+
+            members.forEach(member => {
+                const paidAmount = memberContributions[member] || 0;
+                if (paidAmount > topPayer.amount) {
+                    topPayer = { name: member, amount: paidAmount };
+                }
+
+                const balance = balances[member];
+                if (balance > topCreditor.amount) {
+                    topCreditor = { name: member, amount: balance };
+                }
+                if (balance < topDebtor.amount) {
+                    topDebtor = { name: member, amount: balance };
+                }
+            });
+
+            topPayerDebtorCreditorDiv.innerHTML = '<h3 class="text-xl font-semibold text-gray-700 mt-4">برترین‌ها:</h3>';
+            if (topPayer.name && topPayer.amount > 0) {
+                topPayerDebtorCreditorDiv.innerHTML += `<p><strong>بیشترین پرداخت‌کننده:</strong> ${topPayer.name} (${topPayer.amount.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان)</p>`;
+            } else {
+                 topPayerDebtorCreditorDiv.innerHTML += '<p class="text-gray-500">اطلاعاتی برای بیشترین پرداخت‌کننده وجود ندارد.</p>';
+            }
+
+            if (topCreditor.name && topCreditor.amount > 0) {
+                topPayerDebtorCreditorDiv.innerHTML += `<p><strong>بیشترین طلبکار:</strong> ${topCreditor.name} (${topCreditor.amount.toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان)</p>`;
+            } else {
+                topPayerDebtorCreditorDiv.innerHTML += '<p class="text-gray-500">اطلاعاتی برای بیشترین طلبکار وجود ندارد.</p>';
+            }
+
+            if (topDebtor.name && topDebtor.amount < 0) {
+                topPayerDebtorCreditorDiv.innerHTML += `<p><strong>بیشترین بدهکار:</strong> ${topDebtor.name} (${Math.abs(topDebtor.amount).toLocaleString('fa-IR', { maximumFractionDigits: 0 })} تومان)</p>`;
+            } else {
+                topPayerDebtorCreditorDiv.innerHTML += '<p class="text-gray-500">اطلاعاتی برای بیشترین بدهکار وجود ندارد.</p>';
+            }
+        }
+
+        /**
+         * رسم نمودار دایره‌ای مشارکت اعضا با استفاده از D3.js.
+         * @param {Array<object>} data - آرایه‌ای از اشیاء مانند { name: 'MemberName', value: amount }.
+         */
+        function drawPieChart(data) {
+            const width = 300;
+            const height = 300;
+            const radius = Math.min(width, height) / 2;
+
+            d3.select("#memberContributionChart").selectAll("*").remove();
+
+            const svg = d3.select("#memberContributionChart")
+                .attr("width", width)
+                .attr("height", height)
+                .attr("viewBox", `0 0 ${width} ${height}`)
+                .append("g")
+                .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+            const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+            const pie = d3.pie()
+                .value(d => d.value)
+                .sort(null);
+
+            const arc = d3.arc()
+                .innerRadius(0)
+                .outerRadius(radius);
+
+            const arcs = svg.selectAll(".arc")
+                .data(pie(data))
+                .enter()
+                .append("g")
+                .attr("class", "arc");
+
+            arcs.append("path")
+                .attr("d", arc)
+                .attr("fill", d => color(d.data.name))
+                .attr("stroke", "white")
+                .style("stroke-width", "2px");
+
+            arcs.append("text")
+                .attr("transform", d => `translate(${arc.centroid(d)})`)
+                .attr("text-anchor", "middle")
+                .attr("font-family", "Vazirmatn, sans-serif")
+                .attr("font-size", "12px")
+                .attr("fill", "white")
+                .text(d => `${d.data.name} (${d.data.value.toLocaleString('fa-IR', { maximumFractionDigits: 0 })})`);
+
+            const legend = svg.selectAll(".legend")
+                .data(color.domain())
+                .enter()
+                .append("g")
+                .attr("class", "legend")
+                .attr("transform", (d, i) => `translate(${radius + 20}, ${-radius + i * 20})`);
+
+            legend.append("rect")
+                .attr("width", 18)
+                .attr("height", 18)
+                .attr("fill", color)
+                .attr("stroke", "white");
+
+            legend.append("text")
+                .attr("x", 24)
+                .attr("y", 9)
+                .attr("dy", ".35em")
+                .attr("font-family", "Vazirmatn, sans-serif")
+                .attr("font-size", "12px")
+                .attr("text-anchor", "start")
+                .text(d => d);
+        }
+
+        /**
+         * نمایش دیالوگ برون‌ریزی/درون‌ریزی داده‌ها.
+         */
+        async function showImportExportDialog() {
+            const { value: action } = await Swal.fire({
+                title: 'مدیریت داده‌های دنگ',
+                text: 'مایلید داده‌های فعلی را برون‌ریزی کنید یا داده‌های جدیدی را درون‌ریزی کنید؟',
+                icon: 'question',
+                showCancelButton: true,
+                showDenyButton: true,
+                confirmButtonText: '<i class="fas fa-download"></i> برون‌ریزی داده‌ها',
+                denyButtonText: '<i class="fas fa-upload"></i> درون‌ریزی داده‌ها',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    denyButton: 'swal2-deny-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                }
+            });
+
+            if (action === true) {
+                exportData();
+            } else if (action === false) {
+                importDataDialog();
+            }
+        }
+
+        /**
+         * برون‌ریزی تمام داده‌ها (شامل تاریخچه) به یک فایل JSON.
+         */
+        function exportData() {
+            const data = {
+                members: members,
+                expenses: expenses,
+                expenseIdCounter: expenseIdCounter,
+                historyProjects: historyProjects // شامل پروژه‌های تاریخچه در برون‌ریزی
+            };
+            const jsonString = JSON.stringify(data, null, 2);
+
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dang_all_data.json'; // تغییر نام فایل برای نشان دادن تمام داده‌ها
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showMessage('موفقیت!', 'تمام داده‌ها با موفقیت برون‌ریزی شدند.', 'success');
+        }
+
+        /**
+         * برون‌ریزی یک پروژه خاص از تاریخچه.
+         * @param {string} projectId - شناسه پروژه برای برون‌ریزی.
+         */
+        function exportSpecificProject(projectId) {
+            const projectToExport = historyProjects.find(p => p.id === projectId);
+            if (!projectToExport) {
+                showMessage('خطا!', 'دنگ مورد نظر برای برون‌ریزی یافت نشد.', 'error');
+                return;
+            }
+
+            const dataToExport = {
+                members: projectToExport.members,
+                expenses: projectToExport.expenses,
+                expenseIdCounter: projectToExport.expenseIdCounter
+            };
+            const jsonString = JSON.stringify(dataToExport, null, 2);
+
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dang_project_${projectToExport.name.replace(/\s/g, '_')}.json`; // نام فایل پویا
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            Swal.fire({
+                title: 'داده‌ها برون‌ریزی شد!',
+                html: `
+                    <p class="text-gray-700 mb-3">فایل دنگ "${projectToExport.name}" با موفقیت دانلود شد.</p>
+                    <p class="text-gray-700 mb-2 font-bold">چگونه با دوستانتان به اشتراک بگذارید:</p>
+                    <ul class="list-disc list-inside text-right text-gray-600 mb-3">
+                        <li>این فایل JSON را از پوشه دانلودهای خود پیدا کنید.</li>
+                        <li>آن را از طریق پیام‌رسان‌ها (مانند واتساپ، تلگرام) یا ایمیل برای دوستانتان ارسال کنید.</li>
+                    </ul>
+                    <p class="text-gray-700 mb-2 font-bold">چگونه دوستانتان آن را درون‌ریزی کنند:</p>
+                    <ul class="list-disc list-inside text-right text-gray-600">
+                        <li>دوستانتان باید همین برنامه دنگ را در مرورگر خود باز کنند.</li>
+                        <li>از منوی کناری (همبرگری در بالا سمت چپ)، گزینه "مدیریت داده‌ها" را انتخاب کنند.</li>
+                        <li>روی دکمه "درون‌ریزی داده‌ها" کلیک کرده و فایل JSON که شما ارسال کرده‌اید را انتخاب کنند.</li>
+                        <li>**توجه:** این برنامه آفلاین کار می‌کند و تغییرات در یک دستگاه به صورت خودکار در دستگاه‌های دیگر به‌روز نمی‌شود. هر بار برای همگام‌سازی، باید فایل را برون‌ریزی و مجدداً درون‌ریزی کنید.</li>
+                    </ul>
+                `,
+                icon: 'success',
+                confirmButtonText: '<i class="fas fa-check"></i> فهمیدم',
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl'
+                }
+            });
+        }
+
+        /**
+         * نمایش دیالوگ درون‌ریزی داده‌ها.
+         */
+        async function importDataDialog() {
+            const { value: file } = await Swal.fire({
+                title: 'درون‌ریزی داده‌ها',
+                html: `
+                    <div class="text-right">
+                        <label for="swal-import-file" class="block text-gray-700 text-sm font-bold mb-2">فایل JSON را انتخاب کنید:</label>
+                        <input type="file" id="swal-import-file" accept=".json" class="swal2-file-input w-full p-2 border border-gray-300 rounded-md">
+                    </div>
+                    <p class="text-gray-600 text-xs mt-2">فایل باید حاوی اطلاعات دنگ (اعضا، هزینه‌ها و تاریخچه) در قالب JSON باشد.</p>
+                `,
+                focusConfirm: false,
+                showCancelButton: true,
+                confirmButtonText: '<i class="fas fa-upload"></i> درون‌ریزی',
+                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                reverseButtons: true,
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl',
+                    confirmButton: 'swal2-confirm-button-rtl',
+                    cancelButton: 'swal2-cancel-button-rtl'
+                },
+                preConfirm: () => {
+                    const fileInput = document.getElementById('swal-import-file');
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        Swal.showValidationMessage('لطفا یک فایل JSON انتخاب کنید.');
+                        return false;
+                    }
+                    return fileInput.files[0];
+                }
+            });
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const importedData = JSON.parse(e.target.result);
+                        if (importedData.members && Array.isArray(importedData.members) &&
+                            importedData.expenses && Array.isArray(importedData.expenses) &&
+                            typeof importedData.expenseIdCounter === 'number') {
+
+                            Swal.fire({
+                                title: 'تأیید درون‌ریزی',
+                                text: 'آیا مطمئن هستید؟ این کار اطلاعات فعلی شما را بازنویسی خواهد کرد.',
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: '<i class="fas fa-check"></i> بله، درون‌ریزی کن!',
+                                cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                                reverseButtons: true
+                            }).then((confirmResult) => {
+                                if (confirmResult.isConfirmed) {
+                                    members = importedData.members;
+                                    expenses = importedData.expenses;
+                                    expenseIdCounter = importedData.expenseIdCounter;
+                                    // همچنین پروژه‌های تاریخچه را در صورت موجود بودن در فایل وارد کنید
+                                    historyProjects = importedData.historyProjects && Array.isArray(importedData.historyProjects) ? importedData.historyProjects : [];
+
+                                    saveCurrentSessionState(); // ذخیره داده‌های وارد شده به عنوان جلسه فعلی
+                                    localStorage.setItem('dangHistoryProjects', JSON.stringify(historyProjects)); // ذخیره تاریخچه وارد شده
+                                    renderMembers();
+                                    updatePayerAndParticipantLists();
+                                    renderExpenses();
+                                    calculateDangs();
+                                    renderHistoryList(); // رندر مجدد لیست تاریخچه
+                                    showMessage('موفقیت!', 'داده‌ها با موفقیت درون‌ریزی شدند.', 'success');
+                                } else {
+                                    showMessage('لغو شد', 'درون‌ریزی داده‌ها لغو شد.', 'info');
+                                }
+                            });
+
+                        } else {
+                            showMessage('خطا!', 'ساختار فایل JSON نامعتبر است. لطفا یک فایل دنگ معتبر انتخاب کنید.', 'error');
+                        }
+                    } catch (error) {
+                        showMessage('خطا!', 'خطا در خواندن یا تجزیه فایل JSON. لطفا مطمئن شوید فایل معتبر است.', 'error');
+                        console.error('Error importing data:', error);
+                    }
+                };
+                reader.onerror = () => {
+                    showMessage('خطا!', 'خطا در خواندن فایل.', 'error');
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        /**
+         * گرفتن اسکرین‌شات از کل بدنه و ارائه گزینه اشتراک‌گذاری یا دانلود.
+         */
+        async function takeScreenshotAndShare() {
+            // نمایش پیام بارگذاری
+            const loadingSwal = Swal.fire({
+                title: 'در حال گرفتن اسکرین‌شات...',
+                text: 'لطفا صبر کنید.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    container: 'swal2-container-rtl',
+                    popup: 'swal2-popup-rtl',
+                    title: 'swal2-title-rtl',
+                    htmlContainer: 'swal2-html-container-rtl'
+                }
+            });
+
+            // ذخیره موقعیت اسکرول فعلی
+            const scrollY = window.scrollY;
+            const overflowXStyle = document.body.style.overflowX;
+            const overflowYStyle = document.body.style.overflowY;
+
+            try {
+                // به طور موقت دکمه تغییر سایدبار و اورلی را مخفی کنید تا اسکرین‌شات تمیزتری گرفته شود
+                sidebarToggleBtn.style.display = 'none';
+                sidebarOverlay.classList.remove('active');
+                sidebar.classList.remove('open');
+
+                // تنظیم اسکرول به بالا و اجازه overflow برای گرفتن کامل
+                window.scrollTo(0, 0);
+                document.body.style.overflowX = 'visible'; // اجازه می‌دهد overflow افقی گرفته شود
+                document.body.style.overflowY = 'visible'; // اجازه می‌دهد overflow عمودی گرفته شود
+
+                // گرفتن اسکرین‌شات از کل documentElement
+                const canvas = await html2canvas(document.documentElement, {
+                    scale: window.devicePixelRatio, // استفاده از نسبت پیکسل دستگاه برای کیفیت بهتر در صفحه‌های با DPI بالا
+                    useCORS: true, // تلاش برای بارگذاری تصاویر cross-origin (ممکن است اگر سرور اجازه ندهد، همچنان با شکست مواجه شود)
+                    logging: false, // غیرفعال کردن لاگ‌های html2canvas
+                    backgroundColor: '#f3f4f6' // اطمینان از گرفتن رنگ پس‌زمینه
+                });
+
+                loadingSwal.close(); // بستن پیام بارگذاری
+
+                const imageDataUrl = canvas.toDataURL('image/png');
+                const imageBlob = await (await fetch(imageDataUrl)).blob();
+                const imageFile = new File([imageBlob], 'dang_screenshot.png', { type: 'image/png' });
+
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [imageFile] })) {
+                    // استفاده از Web Share API در صورت موجود بودن
+                    await navigator.share({
+                        files: [imageFile],
+                        title: 'گزارش دنگ من',
+                        text: 'این اسکرین‌شات از وضعیت دنگ ماست!'
+                    });
+                    showMessage('موفقیت!', 'اسکرین‌شات با موفقیت به اشتراک گذاشته شد.', 'success');
+                } else {
+                    // فال‌بک برای مرورگرها/دستگاه‌هایی که از Web Share API پشتیبانی نمی‌کنند
+                    const { isConfirmed } = await Swal.fire({
+                        title: 'اشتراک‌گذاری ناموفق',
+                        text: 'مرورگر شما از قابلیت اشتراک‌گذاری مستقیم پشتیبانی نمی‌کند یا مشکلی رخ داد. آیا مایلید اسکرین‌شات را دانلود کنید؟',
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fas fa-download"></i> بله، دانلود کن',
+                        cancelButtonText: '<i class="fas fa-times"></i> لغو',
+                        reverseButtons: true,
+                        customClass: {
+                            container: 'swal2-container-rtl',
+                            popup: 'swal2-popup-rtl',
+                            title: 'swal2-title-rtl',
+                            htmlContainer: 'swal2-html-container-rtl',
+                            confirmButton: 'swal2-confirm-button-rtl',
+                            cancelButton: 'swal2-cancel-button-rtl'
+                        }
+                    });
+
+                    if (isConfirmed) {
+                        const a = document.createElement('a');
+                        a.href = imageDataUrl;
+                        a.download = 'dang_screenshot.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        showMessage('دانلود شد!', 'اسکرین‌شات با موفقیت دانلود شد.', 'success');
+                    }
+                }
+            } catch (error) {
+                loadingSwal.close();
+                console.error('خطا در گرفتن اسکرین‌شات یا اشتراک‌گذاری:', error);
+                showMessage('خطا!', 'مشکلی در گرفتن اسکرین‌شات یا اشتراک‌گذاری رخ داد.', 'error');
+            } finally {
+                // بازیابی موقعیت اسکرول اصلی و استایل‌های overflow
+                window.scrollTo(0, scrollY);
+                document.body.style.overflowX = overflowXStyle;
+                document.body.style.overflowY = overflowYStyle;
+                sidebarToggleBtn.style.display = 'block'; // اطمینان از قابل مشاهده بودن مجدد دکمه تغییر سایدبار
+            }
+        }
+
+
+        // توابع سایدبار
+        function openSidebar() {
+            sidebar.classList.add('open');
+            sidebarOverlay.classList.add('active');
+            document.body.style.overflowY = 'hidden'; // جلوگیری از اسکرول محتوای اصلی
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('open');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflowY = 'auto'; // فعال کردن مجدد اسکرول
+        }
+
+
+        // شنونده‌های رویداد
+        // رندر اولیه زمانی که DOM به طور کامل بارگذاری شد
+        document.addEventListener('DOMContentLoaded', () => {
+            populateCategoryDropdown(); // پر کردن دسته‌بندی‌ها هنگام بارگذاری و مقداردهی اولیه Select2
+
+            // ابتدا پروژه‌های تاریخچه را بارگذاری کنید
+            const savedHistory = localStorage.getItem('dangHistoryProjects');
+            if (savedHistory) {
+                try {
+                    historyProjects = JSON.parse(savedHistory);
+                } catch (e) {
+                    console.error("خطا در تجزیه پروژه‌های تاریخچه از حافظه محلی:", e);
+                    localStorage.removeItem('dangHistoryProjects');
+                    historyProjects = [];
+                }
+            }
+
+            // سپس وضعیت جلسه فعلی را بررسی کنید
+            const savedCurrentData = loadCurrentSessionState();
+
+            if (savedCurrentData && (savedCurrentData.members.length > 0 || savedCurrentData.expenses.length > 0)) {
+                Swal.fire({
+                    title: 'اطلاعات قبلی موجود است',
+                    text: 'آیا می‌خواهید اطلاعات دنگ فعلی ذخیره شده از جلسه قبلی را بارگذاری کنید؟',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-check"></i> بله، بارگذاری کن',
+                    cancelButtonText: '<i class="fas fa-plus"></i> خیر، شروع جدید',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        members = savedCurrentData.members;
+                        expenses = savedCurrentData.expenses;
+                        expenseIdCounter = savedCurrentData.expenseIdCounter;
+                        showMessage('بارگذاری شد!', 'اطلاعات فعلی از جلسه قبلی با موفقیت بارگذاری شد.', 'success');
+                    } else {
+                        // کاربر انتخاب کرد که از ابتدا شروع کند، داده‌های جلسه فعلی را پاک کنید
+                        members = [];
+                        expenses = [];
+                        expenseIdCounter = 0;
+                        localStorage.removeItem('dangCurrentMembers');
+                        localStorage.removeItem('dangCurrentExpenses');
+                        localStorage.removeItem('dangCurrentExpenseIdCounter');
+                        showMessage('شروع جدید', 'اطلاعات جدید وارد کنید.', 'info');
+                    }
+                    // همیشه UI را پس از تصمیم‌گیری رندر کنید
+                    renderMembers();
+                    updatePayerAndParticipantLists();
+                    renderExpenses();
+                    calculateDangs(); // این تابع نتایج را رندر می‌کند، اما renderReports اکنون دستی است
+                    renderHistoryList(); // رندر لیست تاریخچه پس از تنظیم تمام داده‌ها
+                });
+            } else {
+                // داده فعلی ذخیره شده‌ای وجود ندارد، فقط UI را مقداردهی اولیه کنید
+                renderMembers();
+                updatePayerAndParticipantLists();
+                renderExpenses();
+                calculateDangs(); // این تابع نتایج را رندر می‌کند، اما renderReports اکنون دستی است
+                renderHistoryList(); // رندر لیست تاریخچه
+            }
+        });
+
+        // شنونده رویداد برای کلیک دکمه افزودن عضو
+        addMemberBtn.addEventListener('click', addMember);
+        // شنونده رویداد برای فشردن کلید Enter در فیلد ورودی نام عضو جدید
+        newMemberNameInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                addMember();
+            }
+        });
+
+        // شنونده رویداد برای کلیک دکمه افزودن هزینه
+        addExpenseBtn.addEventListener('click', addExpense);
+
+        // شنونده رویداد برای کلیک دکمه تولید گزارش (اکنون دستی)
+        generateReportsBtn.addEventListener('click', renderReports);
+
+        // شنونده‌های رویداد برای سایدبار
+        sidebarToggleBtn.addEventListener('click', openSidebar);
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar); // بستن سایدبار با کلیک روی اورلی
+        sidebarImportExportBtn.addEventListener('click', showImportExportDialog); // دکمه برون‌ریزی/درون‌ریزی در سایدبار
+        mainPageSaveDangBtn.addEventListener('click', saveCurrentProjectToHistory); // دکمه ذخیره دنگ فعلی در صفحه اصلی
+        screenshotShareBtn.addEventListener('click', takeScreenshotAndShare); // شنونده رویداد دکمه جدید اسکرین‌شات
+
+    </script>
+</body>
+</html>
