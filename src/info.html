@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- Chosen Palette: Calm & Organized Neutrals -->
+<!-- Application Structure Plan: The SPA is designed as a single-page, scrollable narrative to guide the user through the project's story. It starts with a high-level introduction (Hero), delves into the technical foundation (Technology Stack), showcases the core value proposition (Key Features) using a visually engaging grid, explains the user journey (How It Works), and finishes with practical information (Installation & Contribution). This thematic, top-down structure was chosen for maximum clarity and user comprehension, allowing a user to either get a quick overview or dive deeper into specific sections, which is more intuitive for an infographic than mirroring the README's linear document structure. -->
+<!-- Visualization & Content Choices: 
+- Project Intro -> Goal: Inform -> Method: Large text hero section -> Justification: Immediately grabs attention and states the purpose.
+- Technology Stack -> Goal: Organize -> Method: Styled HTML/CSS cards in a grid -> Justification: Clearly categorizes and presents each technology without complex visuals.
+- Key Features (Overall) -> Goal: Inform/Compare -> Method: Multi-column grid of feature cards with icons (FontAwesome) -> Justification: Allows for quick scanning and comparison of the app's capabilities.
+- Reports Feature Sample -> Goal: Compare -> Method: Chart.js Pie Chart on a Canvas -> Interaction: Tooltips on hover -> Justification: Provides a concrete, visual example of the data analysis feature, a key selling point.
+- How it Works -> Goal: Organize -> Method: Numbered list with HTML/CSS styling -> Justification: Presents a clear, step-by-step process for the user.
+- All diagrams and icons are implemented using HTML/CSS and FontAwesome, strictly adhering to the NO SVG/Mermaid constraint. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اینفوگرافیک نرم‌افزار محاسبه دنگ</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: #f1f5f9; /* slate-100 */
+            color: #1e293b; /* slate-800 */
+        }
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Lalezar', cursive;
+        }
+        .section-title {
+            color: #4338ca; /* indigo-700 */
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        .icon-circle {
+            background-color: #e0e7ff; /* indigo-200 */
+            color: #4f46e5; /* indigo-600 */
+            width: 4rem;
+            height: 4rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.875rem;
+        }
+        .chart-container {
+            position: relative;
+            margin: 1rem auto;
+            height: 350px;
+            width: 100%;
+            max-width: 350px;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 lg:p-10">
+
+    <div class="max-w-6xl mx-auto space-y-16">
+
+        <!-- Hero Section -->
+        <header class="text-center">
+            <h1 class="text-5xl md:text-7xl font-bold text-gray-800">نرم‌افزار محاسبه دنگ</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+                یک راهکار کامل و مدرن برای مدیریت و تقسیم هزینه‌ها در گروه‌ها. این اینفوگرافیک شما را با معماری، امکانات کلیدی و نحوه استفاده از این ابزار قدرتمند آشنا می‌کند.
+            </p>
+        </header>
+
+        <!-- Technology Stack Section -->
+        <section>
+            <h2 class="text-4xl section-title text-center mb-10">زیربنای تکنولوژی</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 text-center">
+                <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fab fa-html5"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">HTML5</h3>
+                </div>
+                <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fab fa-css3-alt"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">Tailwind CSS</h3>
+                </div>
+                <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fab fa-js-square"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">JavaScript</h3>
+                </div>
+                <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fas fa-cubes"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">SweetAlert2</h3>
+                </div>
+                 <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fas fa-mouse-pointer"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">Select2</h3>
+                </div>
+                <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fas fa-chart-pie"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">Chart.js</h3>
+                </div>
+                <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fas fa-camera"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">HTML2Canvas</h3>
+                </div>
+                 <div class="p-6 rounded-lg bg-white/60 backdrop-blur-sm">
+                    <div class="text-4xl text-indigo-500"><i class="fas fa-database"></i></div>
+                    <h3 class="mt-4 text-xl font-bold">LocalStorage</h3>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Features Section -->
+        <section>
+            <h2 class="text-4xl section-title text-center mb-10">قلب تپنده برنامه: امکانات کلیدی</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Feature Card 1: Member Management -->
+                <div class="card p-8 text-center">
+                    <div class="icon-circle mx-auto"><i class="fas fa-users"></i></div>
+                    <h3 class="text-2xl mt-6 font-bold">مدیریت اعضا</h3>
+                    <p class="mt-2 text-gray-600">افزودن، ویرایش و حذف اعضای گروه به سادگی. با اعتبارسنجی هوشمند برای جلوگیری از حذف اعضای درگیر در هزینه‌ها.</p>
+                </div>
+
+                <!-- Feature Card 2: Expense Tracking -->
+                <div class="card p-8 text-center">
+                    <div class="icon-circle mx-auto"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <h3 class="text-2xl mt-6 font-bold">ثبت دقیق هزینه‌ها</h3>
+                    <p class="mt-2 text-gray-600">ثبت هزینه‌ها با تمام جزئیات: عنوان، مبلغ، دسته‌بندی، پرداخت‌کننده و انتخاب چندگانه شرکت‌کنندگان با رابط کاربری جذاب.</p>
+                </div>
+
+                <!-- Feature Card 3: Results & Settlement -->
+                <div class="card p-8 text-center">
+                    <div class="icon-circle mx-auto"><i class="fas fa-balance-scale"></i></div>
+                    <h3 class="text-2xl mt-6 font-bold">نتایج آنی و تسویه حساب</h3>
+                    <p class="mt-2 text-gray-600">مشاهده لحظه‌ای وضعیت بدهکار/طلبکار هر عضو با رنگ‌بندی واضح و دریافت پیشنهادهای هوشمند برای تسویه حساب.</p>
+                </div>
+
+                <!-- Feature Card 4: Reports & Analysis -->
+                <div class="card p-8 md:col-span-2 lg:col-span-1">
+                    <div class="icon-circle mx-auto"><i class="fas fa-chart-line"></i></div>
+                    <h3 class="text-2xl mt-6 font-bold text-center">گزارش و تحلیل تفصیلی</h3>
+                    <p class="mt-2 text-gray-600 text-center">با یک کلیک، گزارش‌های جامع شامل نمودار سهم اعضا، تفکیک هزینه‌ها بر اساس دسته‌بندی و آمارهای کلیدی را مشاهده کنید.</p>
+                    <div class="chart-container">
+                        <canvas id="featuresChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Feature Card 5: Data Management -->
+                <div class="card p-8 text-center">
+                    <div class="icon-circle mx-auto"><i class="fas fa-history"></i></div>
+                    <h3 class="text-2xl mt-6 font-bold">تاریخچه و مدیریت داده‌ها</h3>
+                    <p class="mt-2 text-gray-600">ذخیره دنگ‌های مختلف در تاریخچه، بارگذاری مجدد آن‌ها و قابلیت برون‌ریزی و درون‌ریزی داده‌ها به صورت فایل JSON.</p>
+                </div>
+
+                <!-- Feature Card 6: Share & PWA -->
+                <div class="card p-8 text-center">
+                    <div class="icon-circle mx-auto"><i class="fas fa-share-alt"></i></div>
+                    <h3 class="text-2xl mt-6 font-bold">اشتراک‌گذاری و نصب PWA</h3>
+                    <p class="mt-2 text-gray-600">گرفتن اسکرین‌شات از نتایج برای اشتراک‌گذاری آسان و قابلیت نصب برنامه روی دسکتاپ و موبایل برای دسترسی سریع.</p>
+                </div>
+
+            </div>
+        </section>
+
+         <!-- How It Works Section -->
+        <section>
+            <h2 class="text-4xl section-title text-center mb-10">چگونه کار می‌کند؟ (راهنمای سریع)</h2>
+            <div class="max-w-3xl mx-auto space-y-6">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full text-xl font-bold">۱</div>
+                    <div class="pt-2">
+                        <h3 class="text-xl font-semibold">افزودن اعضا</h3>
+                        <p class="text-gray-600">در بخش مدیریت اعضا، نام دوستان یا اعضای گروه خود را اضافه کنید.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full text-xl font-bold">۲</div>
+                    <div class="pt-2">
+                        <h3 class="text-xl font-semibold">ثبت هزینه‌ها</h3>
+                        <p class="text-gray-600">هر هزینه‌ای که پیش می‌آید را با مشخص کردن پرداخت‌کننده و شرکت‌کنندگان ثبت کنید.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full text-xl font-bold">۳</div>
+                    <div class="pt-2">
+                        <h3 class="text-xl font-semibold">مشاهده نتایج</h3>
+                        <p class="text-gray-600">به صورت آنی ببینید چه کسی بدهکار و چه کسی طلبکار است و چگونه تسویه کنید.</p>
+                    </div>
+                </div>
+                 <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-full text-xl font-bold">۴</div>
+                    <div class="pt-2">
+                        <h3 class="text-xl font-semibold">ذخیره و اشتراک‌گذاری</h3>
+                        <p class="text-gray-600">دنگ خود را ذخیره کنید، گزارش بگیرید یا با یک اسکرین‌شات نتایج را به اشتراک بگذارید.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PWA Installation Section -->
+        <section>
+             <h2 class="text-4xl section-title text-center mb-10">نصب بر روی دستگاه شما</h2>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                 <div class="card p-6 flex items-center gap-6">
+                     <div class="text-5xl text-indigo-500"><i class="fab fa-chrome"></i></div>
+                     <div>
+                         <h3 class="text-2xl font-bold">دسکتاپ و اندروید</h3>
+                         <p class="mt-1 text-gray-600">در مرورگر کروم، روی آیکون نصب در نوار آدرس کلیک کرده و برنامه را به دسکتاپ یا صفحه اصلی خود اضافه کنید.</p>
+                     </div>
+                 </div>
+                 <div class="card p-6 flex items-center gap-6">
+                     <div class="text-5xl text-indigo-500"><i class="fab fa-apple"></i></div>
+                     <div>
+                         <h3 class="text-2xl font-bold">iOS (آیفون و آیپد)</h3>
+                         <p class="mt-1 text-gray-600">در مرورگر سافاری، دکمه Share را بزنید و سپس گزینه "Add to Home Screen" را انتخاب کنید.</p>
+                     </div>
+                 </div>
+             </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center pt-10 border-t border-gray-300">
+            <h3 class="text-2xl font-bold">یک پروژه متن‌باز</h3>
+            <p class="mt-2 text-gray-600">از مشارکت شما برای بهبود این پروژه استقبال می‌شود. برای مشاهده کد منبع و مشارکت، به صفحه گیت‌هاب مراجعه کنید.</p>
+            <a href="#" class="mt-4 inline-block text-white font-bold py-2 px-6 rounded-full bg-gray-800 hover:bg-gray-900 transition-colors">
+                <i class="fab fa-github mr-2"></i> مشاهده در گیت‌هاب
+            </a>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctx = document.getElementById('featuresChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['علی', 'مریم', 'رضا'],
+                    datasets: [{
+                        label: 'سهم در پرداخت‌ها',
+                        data: [120000, 75000, 50000],
+                        backgroundColor: [
+                            '#4f46e5', // indigo-600
+                            '#818cf8', // indigo-400
+                            '#c7d2fe', // indigo-200
+                        ],
+                        borderColor: '#ffffff',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    family: "'Vazirmatn', sans-serif"
+                                }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: {
+                                family: "'Vazirmatn', sans-serif"
+                            },
+                            titleFont: {
+                                family: "'Vazirmatn', sans-serif"
+                            },
+                             callbacks: {
+                                title: function(tooltipItems) {
+                                    const item = tooltipItems[0];
+                                    let label = item.chart.data.labels[item.dataIndex];
+                                    if (Array.isArray(label)) {
+                                      return label.join(' ');
+                                    } else {
+                                      return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
